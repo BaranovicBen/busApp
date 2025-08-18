@@ -1,5 +1,11 @@
 {
-  "527|Pezinok": ["Škola", "Slovenský Grob", "Pezinok"],
-  "527|Viničné": ["Škola","Slovenský Grob", "Viničné"],
-  "527|Avion": ["Škola", "Galvaniho", "Avion Shopping Park"]
+  "527|Pezinok,Žel.stanica": ["Škola", "Slovenský Grob", "Pezinok"],
+  "527|Viničné,Grobská": ["Škola","Slovenský Grob", "Viničné"],
+  "527|Slovenský Grob,Obecný úrad": ["Škola","Slovenský Grob"],
+  "527|Bratislava,Shopping Palace": ["Škola", "Roľnícka","Hospodárska","MiÚ Vajnory","Pračanská","Pri Mlyne","Zlaté Piesky", "Avion Shopping Park"],
+  "527|Bratislava,Zlaté Piesky": ["Škola", "Roľnícka","Hospodárska","MiÚ Vajnory","Pračanská","Pri Mlyne","Zlaté Piesky"],
+
+  "525|Chorvátsky Grob,Námestie": ["Chorvátsky Grob"],
+  "525|Bratislava,Shopping Palace": ["Škola", "Roľnícka","Hospodárska","MiÚ Vajnory","Pračanská","Pri Mlyne","Zlaté Piesky", "Avion Shopping Park"],
+  "525|Bratislava,Zlaté Piesky": ["Škola", "Roľnícka","Hospodárska","MiÚ Vajnory","Pračanská","Pri Mlyne","Zlaté Piesky"]
 }
