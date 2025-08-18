@@ -1,76 +1,79 @@
-// next527.cjs — vytlačí najbližší odchod linky (default 527), jej smer a trasu z routes.json
-// Ako zmeniť linku: node next527.cjs 527         // <-- zmeň číslo linky tu (alebo uveď ako 1. argument)
-// API základ:    http://127.0.0.1:8787            // <-- ak tvoj server beží inde/na inom porte, uprav tu
-const fs = require('fs');
+// cli_board.cjs — pekný výpis oboch nástupíšť (1 aj 2) s odpočtom
+// API základ je lokálny server, pokojne neskôr zmeň na doménu školy:
+//   napr. 'https://bus.tvoja-skola.tld/api/stop-times'  // <-- tu doplň doménu školy po nasadení Caddy
+const API_URL = process.env.API_URL || 'http://127.0.0.1:8787/api/stop-times'; // <-- lokálne API
 
-const LINE = process.argv[2] || '527'; // <-- tu môžeš prepnúť sledovanú linku
-const API_BASE = process.env.API_BASE || 'http://127.0.0.1:8787'; // <-- tu doplň iný host/port ak treba
-const API_URL = `${API_BASE}/api/stop-times`;
+// CLI voľby
+const args = process.argv.slice(2);
+const getArg = (k, def=null) => {
+  const i = args.indexOf(k);
+  return i >= 0 ? (args[i+1] ?? true) : def;
+};
+const ONLY_LINE = getArg('--line', null);      // napr. --line 527
+const LIMIT = Number(getArg('--limit', 5));    // napr. --limit 10
+const ALL_DAY = args.includes('--all-day');    // ak chceš bez filtrovania času
 
-function msUntil(date) { return new Date(date).getTime() - Date.now(); }
-function fmtClock(d) { return new Date(d).toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' }); }
-function fmtCountdown(ms) {
+// pomocné funkcie
+const pad2 = n => String(n).padStart(2, '0');
+const skClock = d => `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+const msUntil = d => (new Date(d).getTime() - Date.now());
+const fmtCountdown = ms => {
   if (ms <= 0) return 'odchádza';
-  const s = Math.floor(ms/1000), m = Math.floor(s/60), sec = s % 60;
-  if (m >= 60) { const h = Math.floor(m/60); return `${h}h ${m%60}m`; }
-  return `${m}m ${String(sec).padStart(2,'0')}s`;
-}
-function loadRoutes() {
-  try { return JSON.parse(fs.readFileSync('./routes.json','utf8')); }
-  catch { return {}; }
-}
-function routeKey(line, headsign) { return `${line}|${headsign}`; }
+  const m = Math.floor(ms / 60000), h = Math.floor(m / 60), mm = m % 60;
+  return h ? `${h} h ${mm} m` : `${mm} m`;
+};
+const withinWindow = (t, minutesPast = 1, minutesAhead = 180) => {
+  const ms = msUntil(t);
+  return ms >= -minutesPast * 60000 && ms <= minutesAhead * 60000;
+};
 
-async function fetchPlatform(p) {
-  const url = `${API_URL}?platform=${encodeURIComponent(p)}&count=8`;
+async function getPlatform(p, count=30) {
+  const url = `${API_URL}?platform=${encodeURIComponent(p)}&count=${count}`;
   const r = await fetch(url);
   if (!r.ok) throw new Error(`API ${r.status}`);
-  return r.json(); // { online, source, rows }
+  const json = await r.json();
+  // očakávame rows s rawTime (ISO) – pochádza zo servera
+  let rows = (json.rows || []).map(x => ({...x, when: new Date(x.rawTime ?? x.planned)}));
+  // voliteľný filter na linku
+  if (ONLY_LINE) rows = rows.filter(r => String(r.line) === String(ONLY_LINE));
+  // ponechaj len nadchádzajúce (ak nie je --all-day)
+  if (!ALL_DAY) rows = rows.filter(r => withinWindow(r.when));
+  // zoradenie podľa času
+  rows.sort((a,b) => a.when - b.when);
+  return { platform: String(p), source: json.source, rows };
 }
 
 (async () => {
   try {
-    // vezmeme obidve nástupištia 1 a 2
-    const [d1, d2] = await Promise.all([fetchPlatform('1'), fetchPlatform('2')]);
-    const all = [...(d1.rows||[]), ...(d2.rows||[])];
+    const [p1, p2] = await Promise.all([getPlatform(1), getPlatform(2)]);
+    const blocks = [p1, p2];
 
-    // prefiltrovane na požadovanú linku
-    const rows = all.filter(r => String(r.line) === String(LINE));
-
-    if (!rows.length) {
-      console.log(`Pre linku ${LINE} momentálne nevidím žiadne odchody (ani online, ani offline).`);
-      console.log(`Skús bez filtra: curl '${API_URL}?platform=1' alebo '?platform=2'`);
-      process.exit(0);
+    for (const b of blocks) {
+      console.log('');
+      console.log(`========== Nástupište ${b.platform} (${b.source}) ==========`); // zobraz aj zdroj (online/offline)
+      if (!b.rows.length) {
+        console.log('Žiadne nadchádzajúce odchody v najbližších 3 hodinách.');
+        continue;
+      }
+      const take = b.rows.slice(0, Math.max(1, LIMIT));
+      for (const r of take) {
+        const when = r.when;
+        console.log(
+          `${skClock(when)}  (o ${fmtCountdown(msUntil(when))})  ` +
+          `linka ${r.line}  →  ${r.headsign}`
+        );
+      }
     }
 
-    // vyber najbližší
-    rows.sort((a,b) => new Date(a.rawTime) - new Date(b.rawTime));
-    const next = rows[0];
-    const when = new Date(next.rawTime || next.planned || Date.now());
-    const eta = fmtCountdown(msUntil(when));
-    const delayMin = (next.delaySec != null) ? Math.round(next.delaySec / 60) : null;
-
-    const routes = loadRoutes();
-    const rkey = routeKey(next.line, next.headsign);
-    const route = routes[rkey];
-
-    // výpis
-    console.log('================ Najbližší odchod =================');
-    console.log(`Linka:       ${next.line}`);
-    console.log(`Smer:        ${next.headsign}`);
-    console.log(`Nástupište:  ${next.platform}`);
-    console.log(`Odchod:      ${fmtClock(when)}  (o ${eta})`);
-    if (delayMin !== null) console.log(`Meškanie:    ${delayMin >= 0 ? '+' : ''}${delayMin} min`);
-    console.log(`Zdroj dát:   ${d1.rows?.includes(next) ? d1.source : d2.source}`);
-    if (route && route.length) {
-      console.log('Trasa:       ' + route.join(' → '));
-    } else {
-      console.log('Trasa:       (neznáma – doplň v routes.json kľúč "' + rkey + '")');
-    }
-    console.log('===================================================');
+    console.log('');
+    console.log('Tipy:');
+    console.log('  node cli_board.cjs --line 527         # iba linka 527 na oboch nástupištiach');
+    console.log('  node cli_board.cjs --limit 10         # zobraz viac odchodov');
+    console.log('  node cli_board.cjs --all-day          # vypni filtrovací čas (debug)');
+    console.log('');
   } catch (e) {
-    console.error('Chyba:', e.message || e);
-    console.error('Tip: skús test spojenia:');
+    console.error('Chyba CLI:', e.message || e);
+    console.error('Skús test API:');
     console.error(`  curl '${API_URL}?platform=1'`);
     console.error(`  curl '${API_URL}?platform=2'`);
     process.exit(1);

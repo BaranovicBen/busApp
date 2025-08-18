@@ -1,0 +1,557 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://www.emtest.sk/cp/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" targetNamespace="http://www.emtest.sk/cp/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Web service for searching over timetables &lt;br /&gt; Version: &lt;b&gt;2.0.0.36&lt;/b&gt;</wsdl:documentation>
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://www.emtest.sk/cp/">
+      <s:element name="GetOnlineStopTime">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="busStopID" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="count" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="platformNumbers" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="getArrivals" type="s:boolean" />
+            <s:element minOccurs="0" maxOccurs="1" name="userID" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="includeSounds" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="orderByDelay" type="s:boolean" />
+            <s:element minOccurs="1" maxOccurs="1" name="snr" type="s:long" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetOnlineStopTimeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetOnlineStopTimeResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="FindAVLStopTime">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="busStopID" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="dateTime" type="s:dateTime" />
+            <s:element minOccurs="1" maxOccurs="1" name="count" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="platformNumbers" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="getArrivals" type="s:boolean" />
+            <s:element minOccurs="1" maxOccurs="1" name="firmId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="FindAVLStopTimeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="FindAVLStopTimeResult" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="stopTimeCol" type="tns:ArrayOfStopTime" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfStopTime">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="StopTime" nillable="true" type="tns:StopTime" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="StopTime">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Delay" type="tns:Delay" />
+          <s:element minOccurs="1" maxOccurs="1" name="Date" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="ArrivalTime" type="s:short" />
+          <s:element minOccurs="1" maxOccurs="1" name="DepartureTime" type="s:short" />
+          <s:element minOccurs="1" maxOccurs="1" name="Time" type="s:short" />
+          <s:element minOccurs="0" maxOccurs="1" name="Stop" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="StopOrder" type="s:short" />
+          <s:element minOccurs="1" maxOccurs="1" name="Platform" type="s:unsignedByte" />
+          <s:element minOccurs="0" maxOccurs="1" name="PlatformText" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="LineNumber" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="TripID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Duty" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="LineType" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="TripNumber" type="s:short" />
+          <s:element minOccurs="1" maxOccurs="1" name="TripIndex" type="s:unsignedByte" />
+          <s:element minOccurs="1" maxOccurs="1" name="RealDriverNumber" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="RealBusIdentificationNumber" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Circuity" type="tns:ArrayOfString" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Delay">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="DelayTime" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="BusStopID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="BusStopOrder" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Deviation" type="s:short" />
+          <s:element minOccurs="1" maxOccurs="1" name="Arrival" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="Departure" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="Error" type="tns:ErrorCode" />
+          <s:element minOccurs="1" maxOccurs="1" name="Longitude" type="s:double" />
+          <s:element minOccurs="1" maxOccurs="1" name="Latitude" type="s:double" />
+          <s:element minOccurs="1" maxOccurs="1" name="BusIdentificationNumber" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="FirmID" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:simpleType name="ErrorCode">
+        <s:restriction base="s:string">
+          <s:enumeration value="e00000_NoError" />
+          <s:enumeration value="e27001_FindDepartureFromBusStop_Unknown" />
+          <s:enumeration value="e27002_GetDelayError" />
+          <s:enumeration value="e27003_GetDelayUndefined" />
+          <s:enumeration value="e27004_FindStopTime_Unknown" />
+        </s:restriction>
+      </s:simpleType>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="FindAVLStopTime1">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="busStopID" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="dateTime" type="s:dateTime" />
+            <s:element minOccurs="1" maxOccurs="1" name="count" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="platformNumbers" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="getArrivals" type="s:boolean" />
+            <s:element minOccurs="1" maxOccurs="1" name="firmId" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="firmDB" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="FindAVLStopTime1Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="FindAVLStopTime1Result" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="stopTimeCol" type="tns:ArrayOfStopTime" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAVLStopTime">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="busstopID" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="platformNumbers" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="getArrivals" type="s:boolean" />
+            <s:element minOccurs="1" maxOccurs="1" name="dateFrom" type="s:dateTime" />
+            <s:element minOccurs="1" maxOccurs="1" name="dateTo" type="s:dateTime" />
+            <s:element minOccurs="1" maxOccurs="1" name="firmID" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="count" nillable="true" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="includeSounds" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAVLStopTimeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAVLStopTimeResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAVLStopTime1">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="busstopID" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="platformNumbers" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="getArrivals" type="s:boolean" />
+            <s:element minOccurs="1" maxOccurs="1" name="dateFrom" type="s:dateTime" />
+            <s:element minOccurs="1" maxOccurs="1" name="dateTo" type="s:dateTime" />
+            <s:element minOccurs="1" maxOccurs="1" name="firmID" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="firmDB" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="count" nillable="true" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="includeSounds" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAVLStopTime1Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAVLStopTime1Result" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetTextsForTable">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="BusStopID" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="ActDateTime" type="s:dateTime" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetTextsForTableResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetTextsForTableResult">
+              <s:complexType>
+                <s:sequence>
+                  <s:element ref="s:schema" />
+                  <s:any />
+                </s:sequence>
+              </s:complexType>
+            </s:element>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetTextsForTable2">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="CompanyID" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="BusStopID" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="ActDateTime" type="s:dateTime" />
+            <s:element minOccurs="0" maxOccurs="1" name="Platforms" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetTextsForTable2Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetTextsForTable2Result" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetValidTextsForTable">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="BusStopID" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="Platforms" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="UserID" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetValidTextsForTableResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetValidTextsForTableResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CheckStatus">
+        <s:complexType />
+      </s:element>
+      <s:element name="CheckStatusResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="CheckStatusResult" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="xmlResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetBussesStatus">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="userID" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="pwd" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetBussesStatusResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetBussesStatusResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="GetOnlineStopTimeSoapIn">
+    <wsdl:part name="parameters" element="tns:GetOnlineStopTime" />
+  </wsdl:message>
+  <wsdl:message name="GetOnlineStopTimeSoapOut">
+    <wsdl:part name="parameters" element="tns:GetOnlineStopTimeResponse" />
+  </wsdl:message>
+  <wsdl:message name="FindAVLStopTimeSoapIn">
+    <wsdl:part name="parameters" element="tns:FindAVLStopTime" />
+  </wsdl:message>
+  <wsdl:message name="FindAVLStopTimeSoapOut">
+    <wsdl:part name="parameters" element="tns:FindAVLStopTimeResponse" />
+  </wsdl:message>
+  <wsdl:message name="FindAVLStopTime1SoapIn">
+    <wsdl:part name="parameters" element="tns:FindAVLStopTime1" />
+  </wsdl:message>
+  <wsdl:message name="FindAVLStopTime1SoapOut">
+    <wsdl:part name="parameters" element="tns:FindAVLStopTime1Response" />
+  </wsdl:message>
+  <wsdl:message name="GetAVLStopTimeSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAVLStopTime" />
+  </wsdl:message>
+  <wsdl:message name="GetAVLStopTimeSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAVLStopTimeResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAVLStopTime1SoapIn">
+    <wsdl:part name="parameters" element="tns:GetAVLStopTime1" />
+  </wsdl:message>
+  <wsdl:message name="GetAVLStopTime1SoapOut">
+    <wsdl:part name="parameters" element="tns:GetAVLStopTime1Response" />
+  </wsdl:message>
+  <wsdl:message name="GetTextsForTableSoapIn">
+    <wsdl:part name="parameters" element="tns:GetTextsForTable" />
+  </wsdl:message>
+  <wsdl:message name="GetTextsForTableSoapOut">
+    <wsdl:part name="parameters" element="tns:GetTextsForTableResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetTextsForTable2SoapIn">
+    <wsdl:part name="parameters" element="tns:GetTextsForTable2" />
+  </wsdl:message>
+  <wsdl:message name="GetTextsForTable2SoapOut">
+    <wsdl:part name="parameters" element="tns:GetTextsForTable2Response" />
+  </wsdl:message>
+  <wsdl:message name="GetValidTextsForTableSoapIn">
+    <wsdl:part name="parameters" element="tns:GetValidTextsForTable" />
+  </wsdl:message>
+  <wsdl:message name="GetValidTextsForTableSoapOut">
+    <wsdl:part name="parameters" element="tns:GetValidTextsForTableResponse" />
+  </wsdl:message>
+  <wsdl:message name="CheckStatusSoapIn">
+    <wsdl:part name="parameters" element="tns:CheckStatus" />
+  </wsdl:message>
+  <wsdl:message name="CheckStatusSoapOut">
+    <wsdl:part name="parameters" element="tns:CheckStatusResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetBussesStatusSoapIn">
+    <wsdl:part name="parameters" element="tns:GetBussesStatus" />
+  </wsdl:message>
+  <wsdl:message name="GetBussesStatusSoapOut">
+    <wsdl:part name="parameters" element="tns:GetBussesStatusResponse" />
+  </wsdl:message>
+  <wsdl:portType name="TableDataSoap">
+    <wsdl:operation name="GetOnlineStopTime">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Method returns collection of times from bus stop from AVL. If parameter "getArrivals" is true then the list of arrivals is returned to the caller, otherwise the list of departures is returned. Parameter "platformNumbers" represents the string of platform numbers joined by semicolon (;). (ONLINE DATA-GLOBAL)</wsdl:documentation>
+      <wsdl:input message="tns:GetOnlineStopTimeSoapIn" />
+      <wsdl:output message="tns:GetOnlineStopTimeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="FindAVLStopTime">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Method returns collection of times from bus stop from AVL. If parameter "getArrivals" is true then the list of arrivals is returned to the caller, otherwise the list of departures is returned. Parameter "platformNumbers" represents the string of platform numbers joined by semicolon(;). If null or empty string is passed in parameter "firmDB", then default DB instance will be used. (ONLINE DATA-GLOBAL) - firmID obsolete</wsdl:documentation>
+      <wsdl:input message="tns:FindAVLStopTimeSoapIn" />
+      <wsdl:output message="tns:FindAVLStopTimeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="FindAVLStopTime1">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Method returns collection of times from bus stop from AVL. If parameter "getArrivals" is true then the list of arrivals is returned to the caller, otherwise the list of departures is returned. Parameter "platformNumbers" represents the string of platform numbers joined by semicolon(;). If null or empty string is passed in parameter "firmDB", then default DB instance will be used. (ONLINE DATA-GLOBAL) - firmID - obsolete</wsdl:documentation>
+      <wsdl:input message="tns:FindAVLStopTime1SoapIn" />
+      <wsdl:output message="tns:FindAVLStopTime1SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAVLStopTime">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Method returns departures or arrivals for parameters. If parameter "getArrivals" is true then arrivals are returned to the caller, otherwise departures are returned. Parameter "platformNumbers" represents the string of platform numbers joined by semicolon(;). If null or empty string is passed in parameter "firmDB", then default DB instance will be used. "Count" parameter is optional (OFFLINE DATA-GLOBAL) - firmID-obsolete</wsdl:documentation>
+      <wsdl:input message="tns:GetAVLStopTimeSoapIn" />
+      <wsdl:output message="tns:GetAVLStopTimeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAVLStopTime1">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Method returns departures or arrivals for parameters. If parameter "getArrivals" is true then arrivals are returned to the caller, otherwise departures are returned. Parameter "platformNumbers" represents the string of platform numbers joined by semicolon(;). If null or empty string is passed in parameter "firmDB", then default DB instance will be used. "Count" parameter is optional (OFFLINE DATA-GLOBAL) </wsdl:documentation>
+      <wsdl:input message="tns:GetAVLStopTime1SoapIn" />
+      <wsdl:output message="tns:GetAVLStopTime1SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetTextsForTable">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns dataset with texts for bus stop (only for Colombian tables)</wsdl:documentation>
+      <wsdl:input message="tns:GetTextsForTableSoapIn" />
+      <wsdl:output message="tns:GetTextsForTableSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetTextsForTable2">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Method returns data with texts for bus stop (universal method) &lt;br/&gt; Parameter ActDateTime looks like '2013-07-10T12:24:36' &lt;br/&gt; Parameter Platforms looks like '2;3;4;5'</wsdl:documentation>
+      <wsdl:input message="tns:GetTextsForTable2SoapIn" />
+      <wsdl:output message="tns:GetTextsForTable2SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetValidTextsForTable">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Method returns data with texts for bus stop (universal method) &lt;br/&gt; Parameter ActDateTime looks like '2013-07-10T12:24:36' &lt;br/&gt; Parameter Platforms looks like '2;3;4;5'</wsdl:documentation>
+      <wsdl:input message="tns:GetValidTextsForTableSoapIn" />
+      <wsdl:output message="tns:GetValidTextsForTableSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CheckStatus">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Method returns state of web service</wsdl:documentation>
+      <wsdl:input message="tns:CheckStatusSoapIn" />
+      <wsdl:output message="tns:CheckStatusSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetBussesStatus">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Method returns bus status(delay)</wsdl:documentation>
+      <wsdl:input message="tns:GetBussesStatusSoapIn" />
+      <wsdl:output message="tns:GetBussesStatusSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="TableDataSoap" type="tns:TableDataSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetOnlineStopTime">
+      <soap:operation soapAction="http://www.emtest.sk/cp/GetOnlineStopTime" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="FindAVLStopTime">
+      <soap:operation soapAction="http://www.emtest.sk/cp/FindAVLStopTime" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="FindAVLStopTime1">
+      <soap:operation soapAction="http://www.emtest.sk/cp/FindAVLStopTime1" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAVLStopTime">
+      <soap:operation soapAction="http://www.emtest.sk/cp/GetAVLStopTime" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAVLStopTime1">
+      <soap:operation soapAction="http://www.emtest.sk/cp/GetAVLStopTime1" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTextsForTable">
+      <soap:operation soapAction="http://www.emtest.sk/cp/GetTextsForTable" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTextsForTable2">
+      <soap:operation soapAction="http://www.emtest.sk/cp/GetTextsForTable2" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetValidTextsForTable">
+      <soap:operation soapAction="http://www.emtest.sk/cp/GetValidTextsForTable" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CheckStatus">
+      <soap:operation soapAction="http://www.emtest.sk/cp/CheckStatus" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetBussesStatus">
+      <soap:operation soapAction="http://www.emtest.sk/cp/GetBussesStatus" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="TableDataSoap12" type="tns:TableDataSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetOnlineStopTime">
+      <soap12:operation soapAction="http://www.emtest.sk/cp/GetOnlineStopTime" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="FindAVLStopTime">
+      <soap12:operation soapAction="http://www.emtest.sk/cp/FindAVLStopTime" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="FindAVLStopTime1">
+      <soap12:operation soapAction="http://www.emtest.sk/cp/FindAVLStopTime1" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAVLStopTime">
+      <soap12:operation soapAction="http://www.emtest.sk/cp/GetAVLStopTime" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAVLStopTime1">
+      <soap12:operation soapAction="http://www.emtest.sk/cp/GetAVLStopTime1" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTextsForTable">
+      <soap12:operation soapAction="http://www.emtest.sk/cp/GetTextsForTable" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTextsForTable2">
+      <soap12:operation soapAction="http://www.emtest.sk/cp/GetTextsForTable2" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetValidTextsForTable">
+      <soap12:operation soapAction="http://www.emtest.sk/cp/GetValidTextsForTable" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CheckStatus">
+      <soap12:operation soapAction="http://www.emtest.sk/cp/CheckStatus" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetBussesStatus">
+      <soap12:operation soapAction="http://www.emtest.sk/cp/GetBussesStatus" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="TableData">
+    <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Web service for searching over timetables &lt;br /&gt; Version: &lt;b&gt;2.0.0.36&lt;/b&gt;</wsdl:documentation>
+    <wsdl:port name="TableDataSoap" binding="tns:TableDataSoap">
+      <soap:address location="http://www.dispecing.info:808/TableData/Service.asmx" />
+    </wsdl:port>
+    <wsdl:port name="TableDataSoap12" binding="tns:TableDataSoap12">
+      <soap12:address location="http://www.dispecing.info:808/TableData/Service.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
