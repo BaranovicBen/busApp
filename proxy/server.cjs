@@ -313,6 +313,13 @@ app.get('/api/board', async (req, res) => {
   }
 });
 
+async function fetchJson(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`Upstream ${r.status}`);
+  return r.json();
+}
+
+
 // Health – aby si nevidel viac „Cannot GET…“
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
