@@ -231,6 +231,17 @@ const endTomorrowPlus = new Date(now.getFullYear(), now.getMonth(), now.getDate(
   return rows;
 }
 
+app.use((req, res, next) => {
+  // počas vývoja pokojne '*', v produkcii radšej konkrétnu doménu:
+  res.setHeader('Access-Control-Allow-Origin', 'https://dev.narniapk.sk'); // alebo '*'
+  res.setHeader('Vary', 'Origin');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
+
+
 // --------- ROUTES ----------
 app.get('/api/stop-times', async (req, res) => {
   try {
