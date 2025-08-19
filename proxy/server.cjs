@@ -231,6 +231,30 @@ const endTomorrowPlus = new Date(now.getFullYear(), now.getMonth(), now.getDate(
   return rows;
 }
 
+async function callBussesStatus() {
+  const body = `
+    <GetBussesStatus xmlns="${SOAP_NS}">
+      <userID>${TABLEDATA_USER_ID}</userID>
+      <pwd>${process.env.TABLEDATA_PWD || ''}</pwd>
+    </GetBussesStatus>`;
+  return soapCall(TABLEDATA_BASE_URL, 'GetBussesStatus', body, SOAP_VERSION_ONLINE || '1.1');
+}
+
+function mergeDelaysByTrip(rows, statusDs) {
+  // status DS zvyčajne obsahuje prvky s tn a de (sekundy)
+  const map = new Map();
+  for (const n of statusDs.D || statusDs.B || []) {
+    if (n.tn) map.set(String(n.tn), Number(n.de) || 0);
+  }
+  for (const r of rows) {
+    if ((r.delaySec == null || Number.isNaN(r.delaySec)) && r.tn && map.has(String(r.tn))) {
+      r.delaySec = map.get(String(r.tn));
+    }
+  }
+  return rows;
+}
+
+
 app.use((req, res, next) => {
   // počas vývoja pokojne '*', v produkcii radšej konkrétnu doménu:
   res.setHeader('Access-Control-Allow-Origin', 'https://dev.narniapk.sk'); // alebo '*'
@@ -272,6 +296,21 @@ app.get('/api/stop-times', async (req, res) => {
       }
     } catch (e) {
       if (process.env.DEBUG) console.log('[DEBUG] stop-times ONLINE error:', e.message);
+    }
+    
+    // v /api/stop-times po úspešnom online parsi:
+    if (online && rows.length) {
+      try {
+        // iba ak delaySec chýba:
+        const needs = rows.some(r => r.delaySec == null);
+        if (needs) {
+          const statusXml = await callBussesStatus();
+          const statusDs = dsFromXmlText(statusXml);
+          rows = mergeDelaysByTrip(rows, statusDs);
+        }
+      } catch (e) {
+        if (process.env.DEBUG) console.log('[DEBUG] BussesStatus error:', e.message);
+      }
     }
 
     // ===== OFFLINE fallback, ak online nič nedalo =====

@@ -1,0 +1,159 @@
+<div id="bus-widget"></div>
+
+<style>
+  /* Vzhľad widgetu */
+  #bus-widget{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#0b1220;color:#e6eefc;padding:16px;border-radius:16px}
+  .bus-grid{display:grid;grid-template-columns:1fr;gap:16px}
+  @media(min-width:800px){.bus-grid{grid-template-columns:1fr 1fr}}
+  .bus-card{background:#101a30;border-radius:16px;padding:16px 18px;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .bus-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .bus-title h2{margin:0;font-size:20px;font-weight:700;color:#e6eefc}
+  .bus-badge{font-size:12px;padding:4px 8px;border-radius:999px;background:#1b2b52;color:#e6eefc}
+  .bus-badge.online{background:#0e4d2f}
+  .row{display:flex;align-items:baseline;gap:12px;padding:6px 0;border-bottom:1px dashed #1b2b52}
+  .row:last-child{border-bottom:none}
+  .time{font-size:28px;font-weight:800;min-width:88px;cursor:pointer;color:#e6eefc}
+  .meta{display:flex;flex-direction:column;gap:3px}
+  .line{font-weight:700;font-size:15px}
+  .headsign{font-size:14px;opacity:.95}
+  .countdown{font-size:13px;opacity:.8}
+  .route{font-size:13px;opacity:.9;margin-top:6px;line-height:1.35}
+  .muted{opacity:.7}
+  .footer{margin-top:8px;font-size:12px;opacity:.6}
+</style>
+
+<script>
+(() => {
+  const API_BASE = 'https://busapp-pxow.onrender.com'; // Render API
+
+  // map trás – uprav podľa seba. Kľúč = "LINKA|HEADSIGN"
+  const ROUTES = {
+    "527|Pezinok,Žel.stanica": ["Škola","Slovenský Grob","Pezinok"],
+    "527|Viničné,Grobská": ["Škola","Slovenský Grob","Viničné"],
+    "527|Bratislava,Shopping Palace": ["Škola","Roľnícka","Hospodárska","MiÚ Vajnory","Pračanská","Pri Mlyne","Zlaté Piesky","Avion Shopping Park"],
+    "527|Bratislava,Zlaté Piesky": ["Škola","Roľnícka","Hospodárska","MiÚ Vajnory","Pračanská","Pri Mlyne","Zlaté Piesky"],
+  "527|Slovenský Grob,Obecný úrad": ["Škola","Slovenský Grob"],
+    "525|Chorvátsky Grob,Námestie": ["Chorvátsky Grob"],
+    "525|Bratislava,Shopping Palace": ["Škola","Roľnícka","Hospodárska","MiÚ Vajnory","Pračanská","Pri Mlyne","Zlaté Piesky","Avion Shopping Park"],
+    "525|Bratislava,Zlaté Piesky": ["Škola","Roľnícka","Hospodárska","MiÚ Vajnory","Pračanská","Pri Mlyne","Zlaté Piesky"]
+  };
+
+  // Pomocné
+  const pad2 = n => String(n).padStart(2, '0');
+  const fmtClock = d => `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  const normLine = t => {
+    t = String(t || '').trim();
+    let m;
+    if (/^\d{1,3}$/.test(t)) return t;
+    if ((m = t.match(/^010(\d{3})$/))) return m[1];
+    if ((m = t.match(/^0+(\d{3})$/))) return m[1];
+    if ((m = t.match(/(\d{3})$/))) return m[1];
+    return t || '?';
+  };
+  const rel = d => {
+    const ms = d - new Date();
+    if (ms <= 0) return 'odchádza';
+    const m = Math.floor(ms / 60000), h = Math.floor(m / 60), mm = m % 60;
+    return h ? `${h} h ${mm} m` : `${mm} m`;
+  };
+  const toWhen = r => new Date(r.rawTime || r.planned);
+  const routeOf = (line, head) => {
+    const arr = ROUTES[`${line}|${head}`];
+    return Array.isArray(arr) ? arr.join(' → ') : '(trasa doplň v routes.json)';
+  };
+
+  let showCountdown = true;
+
+  // UI skeleton
+  const root = document.getElementById('bus-widget');
+  root.innerHTML = `
+    <div class="bus-grid">
+      <div class="bus-card" id="p1">
+        <div class="bus-title"><h2>Nástupište 1</h2><span class="bus-badge" data-badge></span></div>
+        <div class="rows"></div>
+        <div class="footer muted">Klikni na čas → prepne čas/odpočet</div>
+      </div>
+      <div class="bus-card" id="p2">
+        <div class="bus-title"><h2>Nástupište 2</h2><span class="bus-badge" data-badge></span></div>
+        <div class="rows"></div>
+        <div class="footer muted">Aktualizácia každých 15 s</div>
+      </div>
+    </div>
+  `;
+
+  async function fetchPlat(p) {
+    const url = `${API_BASE}/api/stop-times?platform=${p}&count=8`;
+    const r = await fetch(url, { cache: 'no-store' });
+    if (!r.ok) throw new Error(`API ${r.status} on ${url}`);
+    const j = await r.json();
+    const rows = (j.rows || []).map(x => ({ ...x, when: toWhen(x), line: normLine(x.line) }));
+    return { source: (j.online ? 'online' : (j.source || 'offline')), rows };
+  }
+
+  function renderError(el, msg) {
+    const b = el.querySelector('[data-badge]');
+    b.className = 'bus-badge';
+    b.textContent = 'chyba';
+    el.querySelector('.rows').innerHTML = `<div class="muted">${msg}</div>`;
+  }
+
+  function renderPanel(el, data) {
+    const badge = el.querySelector('[data-badge]');
+    badge.className = 'bus-badge ' + (data.source === 'online' ? 'online' : '');
+    badge.textContent = data.source;
+
+    const rowsEl = el.querySelector('.rows');
+    rowsEl.innerHTML = '';
+
+    const future = data.rows.filter(r => r.when >= new Date()).slice(0, 2);
+    if (!future.length) {
+      rowsEl.innerHTML = `<div class="muted">Žiadne nadchádzajúce odchody.</div>`;
+      return;
+    }
+
+    future.forEach((r, i) => {
+      const row = document.createElement('div');
+      row.className = 'row';
+
+      const time = document.createElement('div');
+      time.className = 'time';
+      time.textContent = showCountdown ? rel(r.when) : fmtClock(r.when);
+      time.title = 'Klikni: prepni čas/odpočet';
+      time.onclick = () => { showCountdown = !showCountdown; load(); };
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.innerHTML = `
+        <div class="line">linka ${r.line}</div>
+        <div class="headsign">→ ${r.headsign}</div>
+        <div class="countdown muted">${showCountdown ? fmtClock(r.when) : rel(r.when)}</div>
+      `;
+
+      row.appendChild(time);
+      row.appendChild(meta);
+      rowsEl.appendChild(row);
+
+      const route = document.createElement('div');
+      route.className = 'route';
+      route.textContent = (i === 0 ? 'Trasa (najbližší): ' : 'Trasa (ďalší): ') + routeOf(r.line, r.headsign);
+      rowsEl.appendChild(route);
+    });
+  }
+
+  // Jediná load() funkcia
+  async function load() {
+    try {
+      const [d1, d2] = await Promise.all([fetchPlat(1), fetchPlat(2)]);
+      renderPanel(document.getElementById('p1'), d1);
+      renderPanel(document.getElementById('p2'), d2);
+    } catch (e) {
+      console.error('LOAD FAILED:', e);
+      renderError(document.getElementById('p1'), 'Nepodarilo sa načítať dáta (CORS / sieť?).');
+      renderError(document.getElementById('p2'), 'Nepodarilo sa načítať dáta (CORS / sieť?).');
+    }
+  }
+
+  load();
+  setInterval(load, 15000);
+})();
+</script>
