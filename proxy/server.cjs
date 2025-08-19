@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 8787;
 // <-- ak by dopravca poskytol inú URL, zmeň tu alebo cez env premennú
 const TABLE_BASE = 'http://www.dispecing.info:808/TableData/Service.asmx';
 
-const USER_ID = process.env.TABLEDATA_USER_ID || 'school-website'; // <-- tu daj identifikátor školy, ak chceš
+const ALLOW_ORIGIN = process.env.CORS_ORIGIN || 'https://dev.narniapk.sk/bus/'; // <-- TU daj doménu školy
 const BUS_STOP_ID = 22304;      // <-- tvoja zastávka
 const SNR = 22304001;                    // <-- tvoj snr (ID tabule)
 const DEBUG = process.env.DEBUG == '1';                            // export DEBUG=1 pre verbose logy
@@ -297,6 +297,28 @@ app.get('/api/stop-times', async (req, res) => {
     res.status(500).json({ error: String(e) });
   }
 });
+
+app.get('/api/board', async (req, res) => {
+  try {
+    const count = Math.max(1, Math.min(20, Number(req.query.count) || 10));
+    const [p1, p2] = await Promise.all([
+      fetchJson(`http://127.0.0.1:${PORT}/api/stop-times?platform=1&count=${count}`),
+      fetchJson(`http://127.0.0.1:${PORT}/api/stop-times?platform=2&count=${count}`),
+    ]);
+    // preferuj cache na pár sekúnd v prehliadači
+    res.setHeader('Cache-Control', 'max-age=5');
+    res.json({ p1, p2, at: new Date().toISOString() });
+  } catch (e) {
+    res.status(500).json({ error: String(e) });
+  }
+});
+
+async function fetchJson(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`Upstream ${r.status}`);
+  return r.json();
+}
+
 
 // Health – aby si nevidel viac „Cannot GET…“
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
